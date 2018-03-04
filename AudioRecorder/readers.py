@@ -15,11 +15,11 @@ class MicroPhoneReader(object):
     _audio_stream = None
     
     def __init__(self):
-        print("got in init")
+
         # setup audio recording
         self._audio_device = pyaudio.PyAudio()
-
-    def calibrate(self):
+        self._calibrate()
+    def _calibrate(self):
         self._audio_device = pyaudio.PyAudio()
         self._audio_stream = self._audio_device.open(format=FORMAT, channels=CHANNELS,
                         rate=RATE, input=True,
@@ -50,12 +50,18 @@ class MicroPhoneReader(object):
         return data_samples
 
     def save_data(self, params):
+        sample_size= 1024
+        if params['cap_type'] == 'size': 
+            sample_size = params['data_size']
+        
+        elif params['cap_type'] == 'time':
+            sample_size = int(int(self._data_rate) * int(params['cap_time']))
 
         self._audio_stream = self._audio_device.open(format=FORMAT, channels=CHANNELS,
                         rate=RATE, input=True,
-                        frames_per_buffer=params['data_size'])
+                        frames_per_buffer=sample_size)
         cap_time = strftime("%a, %d %b %Y %H:%M:%S +0000", gmtime())
-        raw_data = self._audio_stream.read(params['data_size'])
+        raw_data = self._audio_stream.read(sample_size)
         data_samples = np.fromstring(raw_data, dtype=np.int16)
         self._audio_stream.stop_stream()
         self._audio_stream .close()
