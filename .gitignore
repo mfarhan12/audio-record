@@ -2,3 +2,4 @@ build/
 dist/
 AudioRecorder.egg-info
 *.txt
+__pycache__
